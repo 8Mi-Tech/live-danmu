@@ -34,9 +34,10 @@ python3 main.py --urls <直播间地址1> <直播间地址2> ...
 ### 彩蛋
 或者说 接下来要分离的内容
 
-一个配合Spotify客户端的模块<br>在`live-danmu`内是作为点歌的
+一个配合Spotify客户端的模块<br>在`live-danmu`内是作为点歌的<br>
+:warning: Spotify号没Premium的就别来凑热闹了
 ```shell
-#登录Spotify (不登录 咋控制播放器)
+#登录Spotify (不登录 咋控制播放器，号上没有Premium的就别来凑热闹了)
 python3 spotify_tools.py
 ```
 登录完成后 请在自己直播间测试 `点歌 xxx` 这个指令
