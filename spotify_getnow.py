@@ -57,9 +57,15 @@ while True:
             print(output_text)
             spotify_output_file(output_file_name, output_text)
         else:
+            clear_terminal()
             print("Spotify当前没有播放歌曲。")
         time.sleep(1)
     except Exception as e:
-        print(f"发生异常: {str(e)}")
+        try:
+            error_data = json.loads(e.response.content)
+            error_message = error_data.get('error', {}).get('message', 'Unknown error')
+            print(f"错误信息: {error_message}")
+        except json.JSONDecodeError:
+            print("无法解析 JSON 响应")
         print("重新登录 Spotify...")
         sp = spotify_checklogin()

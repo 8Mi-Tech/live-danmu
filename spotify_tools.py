@@ -51,7 +51,19 @@ def spotify_add_to_playlist(track_id):
     # 构建track的URI
     track_uri = f"spotify:track:{track_id}"
     # 将歌曲加入当前播放列表
-    return sp.add_to_queue(track_uri)
+    try:
+        sp.add_to_queue(track_uri)
+        print("[Spotify] 添加成功")
+    except spotipy.SpotifyException as e:
+        try:
+            # 解析异常的JSON响应
+            error_data = json.loads(e.response.content)
+            # 提取错误信息
+            error_message = error_data.get('error', {}).get('message', 'Unknown error')
+            print("[Spotify] 错误:", error_message)
+        except json.JSONDecodeError:
+            print("[Spotify] 我知道他发生了故障，但是错误都不给，嘤嘤嘤")
+
 
 def spotify_search(query):
     sp = spotify_checklogin()
@@ -62,7 +74,7 @@ def spotify_search(query):
         track_id = result['tracks']['items'][0]['id']
         # 打印歌曲信息到标准错误流
         track_info = result['tracks']['items'][0]
-        print(f"添加歌曲: {track_info['name']} - {', '.join([artist['name'] for artist in track_info['artists']])}, TrackID: {track_info['id']}", file=sys.stderr)
+        print(f"[Spotify] 搜索结果: {track_info['name']} - {', '.join([artist['name'] for artist in track_info['artists']])}, TrackID: {track_info['id']}", file=sys.stderr)
         return track_id
     else:
         print("No tracks found.", file=sys.stderr)
