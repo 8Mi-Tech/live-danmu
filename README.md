@@ -25,6 +25,12 @@ python3 main.py --urls <直播间地址1> <直播间地址2> ...
 | [AcFun](https://live.acfun.cn/) | :question: | 没直播间，自行测试 |
 | 其他平台 | :question: | 在项目的`danmaku`文件夹内查看是否支持<br>一般没有明确提及的都是未经测试的<br>(我自己没开通对应平台的直播间我咋测试哦) |
 
+### 运行截图
+
+连接了 B站 虎牙 斗鱼 且发送点歌弹幕执行效果<br>（点歌的列表在Spotify内部 使用的时候要注意一下）
+![image](https://github.com/8Mi-Tech/live-danmu/assets/25455400/737dfbd8-0ee2-4cb9-bf8b-a0bcb1bb4c22)
+
+
 ### 彩蛋
 或者说 接下来要分离的内容
 
