@@ -18,7 +18,7 @@ python3 main.py --urls <直播间地址1> <直播间地址2> ...
 状态标志 | :x: 不支持 | :o: 支持 | :question: 未知
 | 平台 | 状态 | 备注 |
 |-----|:----:|-----|
-| [哔哩哔哩](https://live.bilibili.com) | :x: | 最近B站的改动很奇怪<br>就没搞懂他们在搞什么<br>可能 `bilibili.py` 这个得修复了<br>(在看 [bliveedm](https://github.com/xfgryujk/blivedm) 这个项目,别急) |
+| [哔哩哔哩](https://live.bilibili.com) | :x: | 最近B站的改动很奇怪<br>就没搞懂他们在搞什么<br>可能 `bilibili.py` 这个得修复了<br>(在看 [blivedm](https://github.com/xfgryujk/blivedm) 这个项目,别急) |
 | [虎牙](https://huya.com) | :o: | 
 | [斗鱼](https://douyu.com) | :o: | 
 | [CC直播](https://cc.163.com) | :question: | 没直播间，自行测试 |
