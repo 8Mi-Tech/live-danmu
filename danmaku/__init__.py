@@ -22,6 +22,7 @@ from .pps import QiXiu
 from .qf import QF
 from .zhanqi import ZhanQi
 # from .yy import YY
+from .bilibili_login.qrcode import bilibili_login_event
 
 __all__ = ['DanmakuClient']
 
@@ -30,6 +31,7 @@ class DanmakuClient:
     def __init__(self, url, q):
         self.__url = ''
         self.__site = None
+        self.__cookies_dict = None
         self.__hs = None
         self.__ws = None
         self.__stop = False
@@ -65,10 +67,16 @@ class DanmakuClient:
         if self.__site is None:
             print('Invalid link!')
             exit()
-        self.__hs = aiohttp.ClientSession()
+        if self.__u == 'live.bilibili.com':
+            self.__cookies_dict = bilibili_login_event()['cookies']
+        if self.__cookies_dict:
+            self.__hs = aiohttp.ClientSession(cookies=self.__cookies_dict)
+        else:
+            self.__hs = aiohttp.ClientSession()
 
     async def init_ws(self):
         ws_url, reg_datas = await self.__site.get_ws_info(self.__url)
+        #print(ws_url)
         self.__ws = await self.__hs.ws_connect(ws_url)
         if reg_datas:
             for reg_data in reg_datas:
