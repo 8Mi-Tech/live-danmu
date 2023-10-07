@@ -19,6 +19,7 @@ args = parser.parse_args()
 async def printer(q):
     while True:
         m = await q.get()
+        #print("["+str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))+" | "+f'{m["platform"]}] {m["name"]}：{m["content"]}')
         if m['msg_type'] == 'danmaku':
             print("["+str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))+" | "+f'{m["platform"]}] {m["name"]}：{m["content"]}')
             if m["content"].startswith("点歌"):
