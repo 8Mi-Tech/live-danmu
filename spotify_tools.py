@@ -1,9 +1,11 @@
 #!/bin/python3
+import os
 import sys
 import time
 import json
 import spotipy
 #import webbrowser
+import requests
 from spotipy.oauth2 import SpotifyOAuth
 
 def spotify_login():
@@ -12,9 +14,16 @@ def spotify_login():
     client_secret = '06fb2f3e2f3b44bbbbc3def798f61db7'
     redirect_uri = 'http://127.0.0.1:8001'  # 指定本地Web服务器的地址和端口
     # 创建SpotifyOAuth对象，并设置open_browser参数为True
-    sp_oauth = SpotifyOAuth(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope='user-read-playback-state user-modify-playback-state user-read-currently-playing', open_browser=True)
-    if not sp_oauth.get_cached_token():
-        sp_oauth.get_access_token()
+    sp_oauth = SpotifyOAuth(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope='user-read-playback-state user-modify-playback-state user-read-currently-playing', open_browser=True, show_dialog=True)
+    while True:
+        try:
+            if not sp_oauth.get_cached_token():
+                sp_oauth.get_access_token()
+            break
+        except spotipy.oauth2.SpotifyOauthError as e:
+            file_path = ".cache"  # 指定要删除的文件路径
+            if os.path.exists(file_path):
+                os.unlink(file_path)
     token_info = sp_oauth.get_cached_token()
     # 创建一个Spotify客户端对象
     if token_info and 'access_token' in token_info:
@@ -24,11 +33,13 @@ def spotify_login():
         print("无法获取访问令牌", file=sys.stderr)
         return None
 
-def spotify_checklogin():
+def spotify_checklogin(onlyToken=False):
     # 检查令牌是否存在
     try:
         with open('.cache', 'r') as cache_file:
             token_info = json.load(cache_file)
+        if onlyToken is True:
+            return token_info['access_token']
     except FileNotFoundError:
         print(".cache file not found. Please login first.", file=sys.stderr)
     if 'access_token' in token_info and 'expires_at' in token_info:
@@ -46,24 +57,12 @@ def spotify_checklogin():
     else:
         return spotify_login()
 
-def spotify_add_to_playlist(track_id):
+def spotify_add_to_playback(track_id):
     sp = spotify_checklogin()
     # 构建track的URI
     track_uri = f"spotify:track:{track_id}"
     # 将歌曲加入当前播放列表
-    try:
-        sp.add_to_queue(track_uri)
-        print("[Spotify] 添加成功")
-    except spotipy.SpotifyException as e:
-        try:
-            # 解析异常的JSON响应
-            error_data = json.loads(e.response.content)
-            # 提取错误信息
-            error_message = error_data.get('error', {}).get('message', 'Unknown error')
-            print("[Spotify] 错误:", error_message)
-        except json.JSONDecodeError:
-            print("[Spotify] 我知道他发生了故障，但是错误都不给，嘤嘤嘤")
-
+    return sp.add_to_queue(track_uri)
 
 def spotify_search(query):
     sp = spotify_checklogin()
@@ -74,10 +73,50 @@ def spotify_search(query):
         track_id = result['tracks']['items'][0]['id']
         # 打印歌曲信息到标准错误流
         track_info = result['tracks']['items'][0]
-        print(f"[Spotify] 搜索结果: {track_info['name']} - {', '.join([artist['name'] for artist in track_info['artists']])}, TrackID: {track_info['id']}", file=sys.stderr)
+        print(f"添加歌曲: {track_info['name']} - {', '.join([artist['name'] for artist in track_info['artists']])}, TrackID: {track_info['id']}", file=sys.stderr)
         return track_id
     else:
         print("No tracks found.", file=sys.stderr)
+
+def spotify_get_playback_list(loop=False,auto_clean_terminal=False,isjson=False):
+    while True:
+        sp = spotify_checklogin()
+        current_track = sp.current_playback()
+        json_data = json.loads(requests.get("https://api.spotify.com/v1/me/player/queue", headers={'Authorization': f'Bearer {spotify_checklogin(onlyToken=True)}'}).text)
+
+        if auto_clean_terminal is True:
+            clear_terminal()
+        
+        if current_track:
+            track_name = current_track['item']['name']
+            artist_names = [artist['name'] for artist in current_track['item']['artists']]
+            print(f'当前播放曲目：{track_name} - {", ".join(artist_names)}')
+            
+            # 取接下来要播放的歌曲
+            print('接下来的曲目(播放队列):')
+            for index, item in enumerate(json_data['queue'], start=1):
+                track_name = item['name']
+                artist_names = [artist['name'] for artist in item['artists']]
+                print(f'|- {track_name} - {", ".join(artist_names)}')
+        else:
+            print('没有当前播放曲目。')
+        
+        if loop:  # 这里的condition是你需要检测的条件
+            time.sleep(1)
+        else: 
+            break
+
+def clear_terminal():
+    # 获取当前操作系统类型
+    platform = sys.platform
+    # 根据操作系统类型选择清空终端的命令
+    if platform.startswith('linux') or platform == 'darwin':
+        os.system('clear')  # 对于Linux和macOS
+    elif platform == 'win32':
+        os.system('cls')  # 对于Windows
+    else:
+        # 在其他操作系统上的默认处理方式
+        pass
 
 if __name__ == "__main__":
     sp = spotify_login()
